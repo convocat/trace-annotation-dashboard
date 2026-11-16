@@ -30,6 +30,7 @@ class LangfuseConfig:
     project_id: str | None = None
     dataset: str | None = None
     tags: list[str] = field(default_factory=list)
+    environment: str | None = None
     limit: int = 500
     tls_verify: bool = True
 
@@ -138,6 +139,7 @@ def _parse(raw: dict[str, Any], base_dir: Path) -> AppConfig:
             project_id=lf.get("project_id"),
             dataset=lf.get("dataset"),
             tags=list(lf.get("tags") or []),
+            environment=lf.get("environment"),
             limit=int(lf.get("limit", 500)),
             tls_verify=bool(lf.get("tls_verify", True)),
         )

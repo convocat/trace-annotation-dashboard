@@ -60,6 +60,7 @@ def _build_loader(cfg: AppConfig) -> Loader:
             project_id=cfg.langfuse.project_id,
             dataset=cfg.langfuse.dataset,
             tags=cfg.langfuse.tags,
+            environment=cfg.langfuse.environment,
             limit=cfg.langfuse.limit,
             tls_verify=cfg.langfuse.tls_verify,
         )
