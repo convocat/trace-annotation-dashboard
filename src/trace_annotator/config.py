@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from dotenv import load_dotenv
 
 from .pii.filter import Locale, PIIFilter, PIIMode
 
@@ -31,7 +32,7 @@ class LangfuseConfig:
     dataset: str | None = None
     tags: list[str] = field(default_factory=list)
     environment: str | None = None
-    limit: int = 500
+    limit: int = 100  # Cloud-friendly default (one page). Raise for self-hosted.
     tls_verify: bool = True
 
 
@@ -78,15 +79,28 @@ CONFIG_FILENAME = ".trace-dashboard.yml"
 
 
 def load_config(explicit_path: Path | str | None = None) -> AppConfig:
-    """Resolve and parse config. Returns defaults if no file is found."""
+    """Resolve and parse config. Returns defaults if no file is found.
+
+    Also loads `.env` from the config's directory (or cwd if no config found)
+    so credentials like LANGFUSE_PUBLIC_KEY land in the environment before
+    loaders look them up. Existing env vars are NOT overridden — explicit shell
+    exports win over .env entries.
+    """
     path = _resolve_path(explicit_path)
+    base_dir = path.parent if path else Path.cwd()
+
+    # Load .env from the project root (where the config lives). Silent if missing.
+    env_path = base_dir / ".env"
+    if env_path.exists():
+        load_dotenv(env_path, override=False)
+
     if path is None:
         return AppConfig()
 
     with open(path, encoding="utf-8") as f:
         raw = yaml.safe_load(f) or {}
 
-    return _parse(raw, base_dir=path.parent)
+    return _parse(raw, base_dir=base_dir)
 
 
 def _resolve_path(explicit: Path | str | None) -> Path | None:
@@ -140,7 +154,7 @@ def _parse(raw: dict[str, Any], base_dir: Path) -> AppConfig:
             dataset=lf.get("dataset"),
             tags=list(lf.get("tags") or []),
             environment=lf.get("environment"),
-            limit=int(lf.get("limit", 500)),
+            limit=int(lf.get("limit", 100)),
             tls_verify=bool(lf.get("tls_verify", True)),
         )
 

@@ -47,10 +47,19 @@ annotations:
 port: 5000
 ```
 
+Credentials live next to the config in a `.env` file at your project root:
+
+```
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+```
+
+The dashboard picks these up automatically — no shell export needed. Shell-exported variables still win over `.env` entries, so you can override per-session.
+
 Then either:
 
 - **Via Claude Code**: ask the agent to "start the trace dashboard" (requires the `/trace-dashboard` skill).
-- **Via shell**: `trace-dashboard` (reads `.trace-dashboard.yml` from current dir).
+- **Via shell**: `trace-dashboard` (reads `.trace-dashboard.yml` + `.env` from current dir).
 
 Open `http://127.0.0.1:5000` in your browser.
 

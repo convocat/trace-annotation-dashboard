@@ -22,9 +22,12 @@ langfuse:
   dataset: my-golden-set              # optional; scope to one dataset's runs
   tags: []                             # optional; only traces with ALL tags
   environment: course                  # optional; filter to one Langfuse environment
-  limit: 500                           # max traces to list
+  # limit: raise for self-hosted Langfuse. On cloud, 100 keeps you under the
+  # rate limit comfortably; higher values page through and may trigger 429s
+  # (we retry with backoff, but it slows the index load).
+  limit: 100
   tls_verify: true                     # set false for self-signed internal hosts
-  # Credentials from env (per project):
+  # Credentials picked up from .env in the project root, or the shell env:
   #   LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
 
 # --- Excel source (alternative; comment out `langfuse` above if used) -------
