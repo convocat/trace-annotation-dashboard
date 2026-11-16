@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ project_name }} — Trace Annotation</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+<aside>
+  <div class="aside-header">
+    <div>
+      <h1>{{ project_name }}</h1>
+      <div class="subtitle" data-i18n="subtitle">Trace annotation · PII-safe</div>
+    </div>
+    <div class="lang-toggle">
+      <button data-lang="en" onclick="window.i18n.setLang('en')" data-i18n="lang.toggle.en">EN</button>
+      <button data-lang="nl" onclick="window.i18n.setLang('nl')" data-i18n="lang.toggle.nl">NL</button>
+    </div>
+  </div>
+
+  <h3 data-i18n="filters.heading">Filters</h3>
+  <select id="filterSource">
+    <option value="" data-i18n="filters.allSources">All sources</option>
+  </select>
+  <select id="filterStatus">
+    <option value="" data-i18n="filters.allTraces">All traces</option>
+    <option value="todo" data-i18n="filters.status.todo">To do</option>
+    <option value="done" data-i18n="filters.status.done">Annotated</option>
+    <option value="pass" data-i18n="filters.status.pass">Pass</option>
+    <option value="fail" data-i18n="filters.status.fail">Fail</option>
+  </select>
+  <input type="text" id="filterSearch" data-i18n-placeholder="filters.search.placeholder">
+
+  <div class="progress-block">
+    <h3 data-i18n="progress.heading">Progress</h3>
+    <div id="progressText">0 / 0</div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <h3 data-i18n="categories.heading">Categories (axial)</h3>
+  <div id="catList" class="cat-list"><em class="muted" data-i18n="categories.empty">No categories yet</em></div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <button class="ghost" onclick="prev()"
+            data-i18n="nav.prev" data-i18n-title="nav.titlePrev">← Prev</button>
+    <div class="pos" id="position">Trace 0 / 0</div>
+    <button class="ghost" onclick="next()"
+            data-i18n="nav.next" data-i18n-title="nav.titleNext">Next →</button>
+    <span class="trace-id-label" id="traceIdLabel"></span>
+  </div>
+
+  <div class="trace-card" id="traceCard">
+    <div class="trace-meta" id="traceMeta"></div>
+    <div id="messages"></div>
+    <div class="context-block" id="contextBlock" hidden>
+      <h4 data-i18n="context.heading">Prior review / context</h4>
+      <dl id="contextList"></dl>
+      <div class="reaction-inline">
+        <label>
+          <span data-i18n="context.response.label">Your response to this prior review</span>
+          <span class="hint" data-i18n="context.response.hint">— visible to whoever did the original review</span>
+        </label>
+        <textarea id="fldResponse" rows="2"
+                  data-i18n-placeholder="context.response.placeholder"></textarea>
+      </div>
+    </div>
+    <div class="sources" id="sources" hidden>
+      <h4 data-i18n="sources.heading">Sources</h4>
+      <ul id="sourceList"></ul>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-row">
+      <label data-i18n="form.passFail.label">Pass / Fail (binary, Hamel-style)</label>
+      <div class="pf-buttons">
+        <button class="pass" id="btnPass" onclick="setPF('pass')">
+          <span data-i18n="form.pass">✓ Pass</span> <span class="kbd">P</span>
+        </button>
+        <button class="fail" id="btnFail" onclick="setPF('fail')">
+          <span data-i18n="form.fail">✗ Fail</span> <span class="kbd">F</span>
+        </button>
+      </div>
+    </div>
+    <div class="form-row">
+      <label data-i18n="form.note.label">Open coding note (first error / observation)</label>
+      <textarea id="fldNote" rows="3" data-i18n-placeholder="form.note.placeholder"></textarea>
+    </div>
+    <div class="form-row">
+      <label data-i18n="form.category.label">Category (axial coding — type new or pick existing)</label>
+      <input type="text" id="fldCategory" list="catOptions" data-i18n-placeholder="form.category.placeholder">
+      <datalist id="catOptions"></datalist>
+    </div>
+    <div class="form-row">
+      <label data-i18n="form.action.label">Action</label>
+      <input type="text" id="fldAction" list="actionOptions" data-i18n-placeholder="form.action.placeholder">
+      <datalist id="actionOptions">
+        <option value="update prompt">
+        <option value="add source">
+        <option value="RAG fix">
+        <option value="improve context">
+        <option value="adjust refusal">
+        <option value="refine testcase">
+        <option value="no action needed">
+      </datalist>
+    </div>
+    <div class="actions-row">
+      <button onclick="saveAndNext()">
+        <span data-i18n="form.save.andNext">Save &amp; next</span> <span class="kbd">Ctrl+Enter</span>
+      </button>
+      <button class="ghost" onclick="save()" data-i18n="form.save.only">Save only</button>
+    </div>
+    <div class="footer">
+      <strong data-i18n="footer.hotkeys">Hotkeys:</strong>
+      <span class="kbd">J</span>/<span class="kbd">→</span> <span data-i18n="footer.hotkey.next">next</span> ·
+      <span class="kbd">K</span>/<span class="kbd">←</span> <span data-i18n="footer.hotkey.prev">prev</span> ·
+      <span class="kbd">P</span> <span data-i18n="footer.hotkey.pass">pass</span> ·
+      <span class="kbd">F</span> <span data-i18n="footer.hotkey.fail">fail</span> ·
+      <span class="kbd">Ctrl+Enter</span> <span data-i18n="footer.hotkey.saveAndNext">save &amp; next</span>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='i18n.js') }}"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# .trace-dashboard.yml — drop this at the root of any project where you want to
+# run the trace annotation dashboard. All fields are optional — defaults fill in.
+#
+# Copy to `.trace-dashboard.yml` (no `.example`) and edit.
+
+project_name: my-chatbot-project     # shown in the dashboard title
+
+source: langfuse                      # langfuse | excel
+port: 5000
+host: 127.0.0.1
+open_browser: true
+cache_size: 500                       # max traces held in in-memory session cache
+
+annotations:
+  # Where to write your scores/notes. Relative paths resolve from this file's directory.
+  path: testannotaties/annotations.xlsx
+
+# --- Langfuse source --------------------------------------------------------
+langfuse:
+  host: https://cloud.langfuse.com    # or your self-hosted URL
+  project_id: your-project-id         # optional; the SDK usually infers from the key
+  dataset: my-golden-set              # optional; scope to one dataset
+  tags: []                             # optional; only traces with ALL tags
+  limit: 500                           # max traces to list
+  tls_verify: true                     # set false for self-signed internal hosts
+  # Credentials from env:
+  #   LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
+
+# --- Excel source (alternative; comment out `langfuse` above if used) -------
+# excel:
+#   path: testannotaties/raw_data.xlsx
+#   schemas:
+#     SheetOne:
+#       question_cols: [Question]
+#       answer_col: Bot answer
+#       trace_id_col: Trace ID
+#       meta_cols: [ID, Category]
+#       context_cols: [Prior rating, Notes]
+
+# --- PII filter -------------------------------------------------------------
+pii_filter:
+  mode: strict                         # strict | lenient | off
+  locales: [any, nl]                   # any (email+credit card), nl, us, uk
+  replacement: "[{type}]"              # or "[REDACTED]" for a single token
+  # patterns: [bsn, iban_nl, email]    # optional override: only these run

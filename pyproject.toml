@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "trace-annotation-dashboard"
+version = "0.1.0"
+description = "Lightweight web dashboard for annotating LLM traces (Langfuse + Excel), with built-in Dutch PII scrubbing."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Convocat", email = "maaike@convocat.nl" },
+]
+keywords = ["langfuse", "llm", "evaluation", "annotation", "dashboard", "pii"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Flask",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "flask>=3.0",
+    "langfuse>=2.0",
+    "openpyxl>=3.1",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
+]
+
+[project.scripts]
+# Entry point for people who DO want CLI access. Our primary launcher is the Claude Code skill.
+trace-dashboard = "trace_annotator.app:run"
+
+[project.urls]
+Homepage = "https://github.com/convocat/trace-annotation-dashboard"
+Issues = "https://github.com/convocat/trace-annotation-dashboard/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/trace_annotator"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
